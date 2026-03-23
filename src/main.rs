@@ -51,8 +51,6 @@ fn main() {
     let workspace = &workspaces[selected];
     std::fs::write(".terraform/environment", workspace)
         .expect("failed to write .terraform/environment");
-
-    println!("Switched to workspace: {}", workspace);
 }
 
 fn run_selector(workspaces: &[String], initial: usize) -> Option<usize> {
