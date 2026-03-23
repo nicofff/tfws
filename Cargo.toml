@@ -1,0 +1,13 @@
+[package]
+name = "tfws"
+version = "0.1.0"
+edition = "2024"
+description = "Interactive Terraform workspace selector — navigate workspaces with arrow keys"
+license = "MIT"
+repository = "https://github.com/nicofff/tfws"
+keywords = ["terraform", "workspace", "cli", "devops"]
+categories = ["command-line-utilities"]
+readme = "README.md"
+
+[dependencies]
+crossterm = "0.28"
