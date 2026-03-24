@@ -6,6 +6,7 @@ use crossterm::{
     terminal::{self, ClearType},
 };
 use std::io;
+
 use std::process::Command;
 
 fn main() {
@@ -35,12 +36,37 @@ fn main() {
         .find(|l| l.trim_start().starts_with('*'))
         .map(|l| l.trim_start_matches(['*', ' ']).trim().to_string());
 
+    let query = std::env::args().nth(1);
+
+    let filtered: Vec<String> = match &query {
+        Some(q) => {
+            let q_lower = q.to_lowercase();
+            workspaces
+                .iter()
+                .filter(|w| w.to_lowercase().contains(&q_lower))
+                .cloned()
+                .collect()
+        }
+        None => workspaces.clone(),
+    };
+
+    if filtered.is_empty() {
+        eprintln!("No workspaces match \"{}\".", query.unwrap());
+        std::process::exit(1);
+    }
+
+    if filtered.len() == 1 {
+        std::fs::write(".terraform/environment", &filtered[0])
+            .expect("failed to write .terraform/environment");
+        return;
+    }
+
     let initial = current
         .as_ref()
-        .and_then(|c| workspaces.iter().position(|w| w == c))
+        .and_then(|c| filtered.iter().position(|w| w == c))
         .unwrap_or(0);
 
-    let selected = match run_selector(&workspaces, initial) {
+    let selected = match run_selector(&filtered, initial) {
         Some(i) => i,
         None => {
             println!("Cancelled.");
@@ -48,7 +74,7 @@ fn main() {
         }
     };
 
-    let workspace = &workspaces[selected];
+    let workspace = &filtered[selected];
     std::fs::write(".terraform/environment", workspace)
         .expect("failed to write .terraform/environment");
 }
@@ -79,9 +105,7 @@ fn run_selector(workspaces: &[String], initial: usize) -> Option<usize> {
             match event {
                 Event::Key(KeyEvent { code, .. }) => match code {
                     KeyCode::Up | KeyCode::Char('k') => {
-                        if selected > 0 {
-                            selected -= 1;
-                        }
+                        selected = selected.saturating_sub(1);
                     }
                     KeyCode::Down | KeyCode::Char('j') => {
                         if selected < workspaces.len() - 1 {
