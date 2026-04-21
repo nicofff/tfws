@@ -41,11 +41,15 @@ fn main() {
     let filtered: Vec<String> = match &query {
         Some(q) => {
             let q_lower = q.to_lowercase();
-            workspaces
-                .iter()
-                .filter(|w| w.to_lowercase().contains(&q_lower))
-                .cloned()
-                .collect()
+            if let Some(exact) = workspaces.iter().find(|w| w.to_lowercase() == q_lower) {
+                vec![exact.clone()]
+            } else {
+                workspaces
+                    .iter()
+                    .filter(|w| w.to_lowercase().contains(&q_lower))
+                    .cloned()
+                    .collect()
+            }
         }
         None => workspaces.clone(),
     };
