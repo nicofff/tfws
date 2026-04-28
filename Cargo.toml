@@ -1,6 +1,6 @@
 [package]
 name = "tfws"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 description = "Interactive Terraform workspace selector — navigate workspaces with arrow keys"
 license = "MIT"
